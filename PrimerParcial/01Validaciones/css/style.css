@@ -61,3 +61,48 @@ footer {
 .tarjeta a:hover {
     text-decoration: underline;
 }
+
+.formulario-registro {
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 400px;
+    margin: 2rem auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.formulario-registro input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #9ca3af;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.formulario-registro button {
+    background-color: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.formulario-registro button:hover {
+    background-color: #1d4ed8;
+}
+
+.formulario-registro input:user-invalid {
+    border-color: #dc2626;
+    background-color: #fef2f2;
+}
+
+.formulario-registro.exitoso {
+    border-color: #16a34a;
+    background-color: #f0fdf4;
+}

@@ -9,8 +9,24 @@ const talleres = [
 
 
 function pintarTabla(){
-    //debe de obtener la tabla y rellenarla con los datos de talleres
+    const tbody = document.querySelector('#tabla-talleres tbody');
+    tbody.innerHTML = ''; // Limpiar contenido previo
+
+    talleres.forEach(taller => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td>${taller.nombre}</td>
+            <td>${taller.instructor}</td>
+            <td>${taller.cupo}</td>
+            <td>${taller.inscritos}</td>
+        `;
+        tbody.appendChild(fila);
+    });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    pintarTabla();
+});
 
 const formArreglos = document.getElementById('form-arreglos');
 const resultadoArreglos = document.getElementById('resultado-arreglo');
@@ -26,6 +42,23 @@ formArreglos.addEventListener('submit', (evento) =>{
         case 'forEach':
             resultado = talleres.map((t) => `- ${t.nombre} (${t.inscritos}/${t.cupo})`).join('\n');
             break;
+
+        case 'map':
+        resultado = talleres.map((t) => t.nombre).join(', ');
+        break;
+
+        case 'filter':
+        resultado = talleres.filter((t) => t.inscritos >= t.cupo)
+                            .map((t) => t.nombre)
+                            .join(', ');
+        break;
+
+        case 'find':
+        const encontrado = talleres.find((t) => t.instructor === 'Ing. María López');
+        resultado = encontrado ? encontrado.nombre : 'No encontrado';
+        break;
+
+        
     }
 
 

@@ -5,8 +5,8 @@
 body {
     margin: 0;
     font-family: 'Courier New', Courier, monospace;
-    color: #1f2937;
-    background-color: #f9fafb;
+    color: #023047; 
+    background-color: #f2f9fc;
 }
 
 .container {
@@ -17,20 +17,20 @@ body {
 
 .content {
     background-color: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #8ecae6; 
     border-radius: 0.5rem;
     padding: 2rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px rgba(2, 48, 71, 0.08); 
 }
 
 .titulocontent h1 {
     font-size: 1.5rem;
-    color: #1f2937;
+    color: #023047;
     margin-top: 0;
 }
 
 .titulocontent p {
-    color: #4b5563;
+    color: #219ebc; 
 }
 
 .tables table {
@@ -41,20 +41,22 @@ body {
 
 .tables th, .tables td {
     padding: 0.75rem 1rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #8ecae6; 
     text-align: left;
 }
 
 .tables th {
-    background-color: #1f2937;
+    background-color: #023047;
     color: #ffffff;
 }
 
 .tables td a {
-    color: #3b82f6;
+    color: #fb8500;
+    font-weight: bold;
     text-decoration: none;
 }
 
 .tables td a:hover {
+    color: #ffb703;
     text-decoration: underline;
 }

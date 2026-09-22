@@ -5,19 +5,19 @@
 body {
     margin: 0;
     font-family: 'Courier New', Courier, monospace;
-    color: #1f2937;
-    background-color: #f9fafb;
+    color: #023047; 
+    background-color: #f2f9fc; 
 }
 
 header {
-    background-color: #1f2937;
+    background-color: #023047; 
     color: #ffffff;
     padding: 1rem;
     text-align: center;
 }
 
-header a{
-    color: #ffffff;
+header a {
+    color: #ffb703;
 }
 
 main {
@@ -29,11 +29,9 @@ main {
 footer {
     text-align: center;
     padding: 1rem;
-    color: #6b7280;
+    color: #219ebc;
     font-size: 0.875rem;
 }
-
-/* Catalogo de talleres */
 
 .catalogo {
     display: grid;
@@ -43,9 +41,10 @@ footer {
 
 .tarjeta {
     background-color: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #8ecae6; 
     border-radius: 0.5rem;
     padding: 1rem;
+    box-shadow: 0 2px 4px rgba(2, 48, 71, 0.05);
 }
 
 .tarjeta h2 {
@@ -54,35 +53,38 @@ footer {
 }
 
 .tarjeta a {
-    color: #3b82f6;
+    color: #fb8500; 
     text-decoration: none;
 }
 
 .tarjeta a:hover {
     text-decoration: underline;
+    color: #ffb703;
 }
 
 .formulario-registro {
     background-color: #ffffff;
-    border: 1px solid #d1d5db;
+    border: 1px solid #8ecae6;
     border-radius: 8px;
     padding: 2rem;
     max-width: 400px;
     margin: 2rem auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px rgba(2, 48, 71, 0.08);
 }
 
 .formulario-registro input {
     width: 100%;
     padding: 0.75rem;
     margin-bottom: 1rem;
-    border: 1px solid #9ca3af;
+    border: 1px solid #219ebc;
     border-radius: 4px;
     font-size: 1rem;
+    background-color: #ffffff;
+    color: #023047;
 }
 
 .formulario-registro button {
-    background-color: #2563eb;
+    background-color: #fb8500; 
     color: #ffffff;
     border: none;
     border-radius: 4px;
@@ -90,11 +92,12 @@ footer {
     font-size: 1rem;
     cursor: pointer;
     width: 100%;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .formulario-registro button:hover {
-    background-color: #1d4ed8;
+    background-color: #ffb703; 
+    color: #023047;
 }
 
 .formulario-registro input:user-invalid {

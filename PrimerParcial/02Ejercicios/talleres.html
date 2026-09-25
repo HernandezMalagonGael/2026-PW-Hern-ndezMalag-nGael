@@ -30,7 +30,6 @@
                     </tbody>
                 </table>
             </div>
-
             <form id="form-arreglos" class="formulario" >
                 <div class="campos" >
                     <label for="operacion-arreglo" name="operacion-arreglo">Operación</label>
@@ -41,15 +40,47 @@
                         <option value="find">find - Buscar por el nombre del instructor</option>
                     </select>
                 </div>
-
                 <button type="submit" >Ejecutar</button>
-
             </form>
-
             <output class="resultado" id="resultado-arreglo" for="form-arreglo" ></output>
         </section>
-    </main>
 
+        <section class="ejercicio" aria-labelledby="titulo-objeto">
+            <h2 id="titulo-objeto">Manejo de Objetos y JSON</h2>
+            <p>Edita el taller y elige que operación deseas aplicar</p>
+            <form id="form-objeto" class="formulario">
+                <div class="campo">
+                    <label for="obj-nombre">Nombre</label>
+                    <input type="text" name="obj-nombre" id="obj-nombre" value="Introducción a Python">
+                </div>
+                <div class="campo">
+                    <label for="obj-instructor">Instructor</label>
+                    <input type="text" name="obj-instructor" id="obj-instructor" value="Ing. María López">
+                </div>
+                <div class="campo">
+                    <label for="obj-cupo">Cupo</label>
+                    <input type="number" name="obj-cupo" id="obj-cupo" value="25" min="0">
+                </div>
+                <div class="campo">
+                    <label for="obj-inscritos">Inscritos</label>
+                    <input type="number" name="obj-inscritos" id="obj-inscritos" value="25" min="0">
+                </div>
+                <div class="campo">
+                    <label for="operacion-objeto">Tipo de Operación</label>
+                    <select name="operacion-objeto" id="operacion-objeto">
+                        <option value="keys">Object.keys</option>
+                        <option value="values">Object.values</option>
+                        <option value="entries">Object.entries</option>
+                        <option value="stringify">JSON a cadena</option>
+                        <option value="roundtrip">Ida y vuelta (JSOM a cadena)</option>
+                    </select>
+                </div>
+                <button type="submit">Ejecutar Opción</button>
+            </form>
+            <output class="resultado" id="resultado-objeto" form="form-objeto"></output>
+        </section>
+
+    </main>
     <script src="./js/app.js" ></script>
     
 </body>

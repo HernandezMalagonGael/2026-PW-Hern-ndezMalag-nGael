@@ -1,21 +1,20 @@
+const crypto = require('crypto');
 const pool = require('../bd-local');
  
-async function registrarAsistencia({ tallerId, usuarioId, fecha, presente }) {
-    const [info] = await pool.query(
-        `INSERT INTO asistencias (taller_id, usuario_id, fecha, presente) VALUES (?, ?, ?, ?)`,
-        [tallerId, usuarioId, fecha || new Date().toISOString().slice(0, 10), presente === undefined ? true : presente]
+async function registrarAsistencia({ tallerId, nombreAlumno, boleta }) {
+    // En la tabla asistencias el id es un UUID (CHAR(36)), asi que lo generamos aqui
+    const id = crypto.randomUUID();
+    await pool.query(
+        `INSERT INTO asistencias (id, taller_id, nombre_alumno, boleta) VALUES (?, ?, ?, ?)`,
+        [id, tallerId, nombreAlumno, boleta]
     );
-    const [filas] = await pool.query(`SELECT * FROM asistencias WHERE id = ?`, [info.insertId]);
+    const [filas] = await pool.query(`SELECT * FROM asistencias WHERE id = ?`, [id]);
     return filas[0];
 }
  
 async function consultarPorTaller(tallerId) {
     const [filas] = await pool.query(
-        `SELECT a.id, a.fecha, a.presente, u.id AS usuario_id, u.nombre, u.boleta
-         FROM asistencias a
-         JOIN usuarios u ON u.id = a.usuario_id
-         WHERE a.taller_id = ?
-         ORDER BY a.fecha, u.nombre`,
+        `SELECT * FROM asistencias WHERE taller_id = ? ORDER BY fecha_registro, nombre_alumno`,
         [tallerId]
     );
     return filas;

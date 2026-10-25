@@ -4,7 +4,6 @@
   "description": "",
   "license": "ISC",
   "author": "HernandezMalagonGael",
-  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "dev":"next dev",

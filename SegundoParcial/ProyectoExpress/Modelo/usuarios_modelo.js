@@ -1,21 +1,22 @@
 const pool = require('../bd-local');
 
-// Nunca se regresa contrasena_hash
 const COLUMNAS_PUBLICAS = 'id, correo, nombre, boleta, rol';
 
-// Consultar a todos
 async function listar() {
     const [filas] = await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM usuarios ORDER BY id`);
     return filas;
 }
 
-// Obtener por id
 async function obtenerPorId(id) {
     const [filas] = await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM usuarios WHERE id = ?`, [id]);
     return filas[0];
 }
 
-// Registrar
+async function buscarPorBoleta(boleta) {
+    const [filas] = await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM usuarios WHERE boleta = ?`, [boleta]);
+    return filas[0];
+}
+
 async function crear({ nombre, correo, contrasenaHash, boleta, rol }) {
     const [info] = await pool.query(
         `INSERT INTO usuarios (nombre, correo, contrasena_hash, boleta, rol) VALUES (?, ?, ?, ?, ?)`,
@@ -24,7 +25,6 @@ async function crear({ nombre, correo, contrasenaHash, boleta, rol }) {
     return obtenerPorId(info.insertId);
 }
 
-// Actualizar solo los campos que llegan
 async function actualizar(id, { nombre, correo, rol }) {
     const cambios = Object.entries({ nombre, correo, rol }).filter(([, valor]) => valor !== undefined);
     if (cambios.length === 0) return obtenerPorId(id);
@@ -37,16 +37,20 @@ async function actualizar(id, { nombre, correo, rol }) {
     return obtenerPorId(id);
 }
 
-// Eliminar
+
 async function eliminar(id) {
     const [info] = await pool.query(`DELETE FROM usuarios WHERE id = ?`, [id]);
     return info.affectedRows > 0;
 }
 
-// Buscar por correo (trae el hash, sirve para el login)
 async function buscarPorCorreoConHash(correo) {
     const [filas] = await pool.query(`SELECT * FROM usuarios WHERE correo = ?`, [correo]);
     return filas[0];
 }
 
-module.exports = { listar, obtenerPorId, crear, actualizar, eliminar, buscarPorCorreoConHash };
+async function listarPorRol(rol) {
+    const [filas] = await pool.query(`SELECT ${COLUMNAS_PUBLICAS} FROM usuarios WHERE rol = ? ORDER BY nombre`, [rol]);
+    return filas;
+}
+
+module.exports = {listar,obtenerPorId,buscarPorBoleta,crear,actualizar,eliminar,buscarPorCorreoConHash, listarPorRol};

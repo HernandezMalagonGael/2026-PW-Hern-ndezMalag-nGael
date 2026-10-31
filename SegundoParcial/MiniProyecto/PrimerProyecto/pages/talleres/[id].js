@@ -3,13 +3,9 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { pedirJSON } from '../../lib/api';
 import { formatearFecha, ocultarBoleta } from '../../lib/formato';
-import { validarBoleta } from '../../lib/validaciones';
+import { mensajeNombre, mensajeBoleta } from '../../lib/validaciones';
 import estilos from '../../styles/Talleres.module.css';
 
-// /talleres/[id] — detalle de un taller.
-// PASO 4: datos del taller, barra de lugares y lista de inscritos
-//         (GET /api/talleres/:id y GET /api/talleres/:id/asistencias).
-// PASO 5: formulario de inscripción (POST /api/asistencias).
 export default function DetalleTaller() {
   const router = useRouter();
   const { id } = router.query;
@@ -18,14 +14,13 @@ export default function DetalleTaller() {
   const [asistencias, setAsistencias] = useState([]);
   const [errorCarga, setErrorCarga] = useState('');
 
-    const [nombre, setNombre] = useState('');
+  const [nombre, setNombre] = useState('');
   const [boleta, setBoleta] = useState('');
   const [errorForm, setErrorForm] = useState('');
   const [exito, setExito] = useState('');
   const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
-    // En el primer render router.query todavía viene vacío: hay que esperar a router.isReady.
     if (!router.isReady) return;
     if (router.query.boleta) setBoleta(String(router.query.boleta));
     if (router.query.nombre) setNombre(String(router.query.nombre));
@@ -42,21 +37,20 @@ export default function DetalleTaller() {
     }
   }
 
-    // Lugares: se calculan con lo que ya está en el estado (cada vez que cambia, React vuelve a calcular).
   const ocupados = asistencias.length;
   const libres = taller ? Math.max(0, taller.cupo - ocupados) : 0;
   const lleno = taller !== null && libres === 0;
 
-    async function inscribir(e) {
+  async function inscribir(e) {
     e.preventDefault();
     setErrorForm('');
     setExito('');
 
-    // El backend de esta semana no revisa cupo ni inscripciones repetidas: lo cuida el front.
-    const nombreLimpio = nombre.trim();
+    const nombreLimpio = nombre.trim().replace(/\s+/g, ' ');
     const boletaLimpia = boleta.trim();
-    if (!nombreLimpio) return setErrorForm('Escribe tu nombre.');
-    if (!validarBoleta(boletaLimpia)) return setErrorForm('La boleta debe tener 10 dígitos.');
+
+    const error = mensajeNombre(nombreLimpio, 'El nombre') || mensajeBoleta(boletaLimpia);
+    if (error) return setErrorForm(error);
     if (asistencias.some((a) => a.boleta === boletaLimpia)) {
       return setErrorForm('Esa boleta ya está inscrita en este taller.');
     }
@@ -79,7 +73,7 @@ export default function DetalleTaller() {
     }
   }
 
-    if (errorCarga) {
+  if (errorCarga) {
     return (
       <main>
         <p className="error">{errorCarga}</p>
@@ -112,7 +106,7 @@ export default function DetalleTaller() {
         </p>
       </section>
 
-      {      <section className={estilos.panel}>
+      <section className={estilos.panel}>
         <h2>Inscribirme</h2>
         <form onSubmit={inscribir} className="formulario">
           <input placeholder="Nombre completo" value={nombre} onChange={(e) => setNombre(e.target.value)} />
@@ -123,7 +117,7 @@ export default function DetalleTaller() {
         </form>
         {errorForm && <p className="error">{errorForm}</p>}
         {exito && <p className={estilos.exito}>{exito}</p>}
-      </section>}
+      </section>
 
       <h2>Inscritos ({ocupados})</h2>
       {ocupados === 0 ? (
@@ -135,6 +129,7 @@ export default function DetalleTaller() {
               <th>#</th>
               <th>Nombre</th>
               <th>Boleta</th>
+              <th>Asistencia</th>
             </tr>
           </thead>
           <tbody>
@@ -143,6 +138,7 @@ export default function DetalleTaller() {
                 <td>{i + 1}</td>
                 <td>{a.nombre_alumno}</td>
                 <td>{ocultarBoleta(a.boleta)}</td>
+                <td>{a.asistio ? 'Presente' : 'Pendiente'}</td>
               </tr>
             ))}
           </tbody>

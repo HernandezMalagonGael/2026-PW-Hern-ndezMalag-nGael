@@ -16,3 +16,20 @@ export function validarContrasena(contrasena) {
   if (typeof contrasena !== 'string') return false;
   return contrasena.length >= 8;
 }
+
+export function mensajeNombre(nombre, campo = 'El campo') {
+  if (!nombre || nombre.trim() === '') {
+    return `${campo} es obligatorio.`;
+  }
+  if (nombre.length < 3) {
+    return `${campo} es demasiado corto.`;
+  }
+  return null; 
+}
+
+export function mensajeBoleta(boleta) {
+  if (!validarBoleta(boleta)) {
+    return 'La boleta debe tener exactamente 10 dígitos numéricos.';
+  }
+  return null;
+}

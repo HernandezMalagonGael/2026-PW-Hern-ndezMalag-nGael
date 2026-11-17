@@ -1,12 +1,18 @@
-// La página solo hace fetch a la API. El navegador manda la cookie solo (misma página, mismo servidor).
+// La página web hace peticiones fetch a la API. El navegador se encarga de mandar la cookie solo 
+// porque estamos en la misma página y el mismo servidor, así que no necesitamos configurar credentials extra.
 const $ = (id) => document.getElementById(id);
+
+/**
+ * Función central para hacer peticiones fetch sin repetir código en cada botón.
+ * Uso try/catch por si el servidor contesta algo que no sea JSON (para que la app no truene).
+ */
 async function llamar(metodo, url, datos = null) {
     const opciones = {
         method: metodo,
         headers: {}
     };
 
-    // Si hay datos que enviar, agregamos el encabezado de JSON y serializamos el cuerpo
+    // Si mandamos un cuerpo (como en el login), avisamos que es JSON y serializamos los datos
     if (datos !== null) {
         opciones.headers['Content-Type'] = 'application/json';
         opciones.body = JSON.stringify(datos);
@@ -19,7 +25,7 @@ async function llamar(metodo, url, datos = null) {
         let datosRespuesta = null;
         const contentType = respuesta.headers.get('content-type');
         
-        // Verificamos si la respuesta es JSON para evitar errores si regresa otra cosa
+        // Verificamos si la respuesta es JSON para leerla bien, si no, la tomamos como texto plano
         if (contentType && contentType.includes('application/json')) {
             datosRespuesta = await respuesta.json();
         } else {
@@ -31,7 +37,7 @@ async function llamar(metodo, url, datos = null) {
             datos: datosRespuesta
         };
     } catch (error) {
-        // En caso de un error de red o fallo general, regresamos status de error y datos null
+        // Si hay un fallo de red o el servidor está apagado, atrapamos el error aquí y regresamos 500
         console.error("Error en la petición fetch:", error);
         return {
             status: 500,
@@ -40,13 +46,17 @@ async function llamar(metodo, url, datos = null) {
     }
 }
 
+/**
+ * Añade los resultados de cada petición a la bitácora visual de la página.
+ * Uso textContent para prevenir ataques XSS (por si alguien intenta inyectar script malicioso).
+ */
 function agregarABitacora(metodo, url, status, datos) {
     const listaBitacora = document.getElementById('bitacora');
     if (!listaBitacora) return;
 
     const li = document.createElement('li');
     
-    // Determinar la clase CSS según el código de estado
+    // Le asignamos un color diferente al código dependiendo de si fue éxito (2xx) o error (401, 403, etc.)
     let claseCodigo = 'codigo error';
     if (status >= 200 && status < 300) {
         claseCodigo = 'codigo ok';
@@ -56,13 +66,12 @@ function agregarABitacora(metodo, url, status, datos) {
         claseCodigo = 'codigo e403';
     }
 
-    // Usamos textContent de forma segura para evitar ataques XSS
     const spanCodigo = document.createElement('span');
     spanCodigo.className = claseCodigo;
     spanCodigo.textContent = status;
 
     const spanDetalles = document.createElement('span');
-    spanDetalles.textContent = ` ${metodo} ${url} - `;
+    spanDetalles.textContent = ` ${metodo} ${url}`;
 
     const preDatos = document.createElement('pre');
     preDatos.textContent = JSON.stringify(datos, null, 2);
@@ -71,36 +80,43 @@ function agregarABitacora(metodo, url, status, datos) {
     li.appendChild(spanDetalles);
     li.appendChild(preDatos);
 
-    // Insertar arriba para que lo más nuevo aparezca primero
+    // Usamos prepend para que lo más nuevo siempre quede hasta arriba de la bitácora
     listaBitacora.prepend(li);
 }
 
+/**
+ * Consulta la ruta GET /api/sesion para ver si tenemos una sesión activa.
+ * Actualiza la tarjeta de estado a verde o rojo, y muestra document.cookie (que saldrá vacío por el httpOnly).
+ */
 async function actualizarEstado() {
     const divEstado = document.getElementById('estado');
     const spanCookie = document.getElementById('cookie-js');
 
-    // Hacemos la petición GET para consultar la sesión actual
     const resultado = await llamar('GET', '/api/sesion');
 
     if (divEstado) {
         if (resultado.status === 200) {
-            // Si hay sesión activa (200), mostramos los datos y clase verde
+            // Si hay sesión (200), ponemos la tarjeta en verde con los datos del usuario
             const { usuario, sesion, expiraEnSegundos } = resultado.datos;
             divEstado.className = 'estado con-sesion';
             divEstado.textContent = `Hola, ${usuario.nombre} (${usuario.rol}) — Sesión: ${sesion} — Vence en ${expiraEnSegundos} s`;
         } else {
-            // Si no hay sesión (ej. 401), mostramos aviso y clase roja
+            // Si no hay sesión (ej. 401), ponemos la tarjeta en rojo avisando el código
             divEstado.className = 'estado sin-sesion';
             divEstado.textContent = `Sin sesión (el servidor responde ${resultado.status})`;
         }
     }
 
-    // Mostramos las cookies accesibles por JavaScript
+    // Como la cookie tiene httpOnly, document.cookie no puede leerla y aparecerá vacía
     if (spanCookie) {
         spanCookie.textContent = document.cookie || '(vacío)';
     }
 }
 
+/**
+ * Consulta el diagnóstico del servidor (MySQL) para ver dónde se guardan las sesiones 
+ * y reconstruye la tabla de sesiones activas.
+ */
 async function actualizarTablaSesiones() {
     const divDonde = document.getElementById('donde');
     const tbodyTabla = document.getElementById('tabla-sesiones');
@@ -110,12 +126,12 @@ async function actualizarTablaSesiones() {
     if (resultado.status === 200) {
         const { almacen, sesiones } = resultado.datos;
 
-        // Mostrar dónde se guardan las sesiones
+        // Mostramos si se guardan en mysql o memoria
         if (divDonde) {
             divDonde.textContent = `Se guardan en: ${almacen}`;
         }
 
-        // Vaciar la tabla antes de volver a llenarla para evitar duplicados
+        // Vaciamos el tbody antes de llenarlo para evitar que se repitan las filas duplicadas
         if (tbodyTabla) {
             tbodyTabla.innerHTML = '';
 
@@ -130,7 +146,7 @@ async function actualizarTablaSesiones() {
                 sesiones.forEach(s => {
                     const tr = document.createElement('tr');
                     
-                    // Si es nuestra sesión, le agregamos la clase 'tuya'
+                    // Si la sesión es nuestra, le ponemos una clase especial para resaltarla
                     if (s.esLaTuya) {
                         tr.className = 'tuya';
                     }
@@ -145,7 +161,7 @@ async function actualizarTablaSesiones() {
                     tdVisitas.textContent = s.visitas;
 
                     const tdVence = document.createElement('td');
-                    // Convertimos la fecha ISO a hora local legible
+                    // Convertimos la fecha ISO que manda el servidor a la hora local legible de la compu
                     tdVence.textContent = new Date(s.expira).toLocaleTimeString();
 
                     tr.appendChild(tdSesion);
@@ -160,15 +176,18 @@ async function actualizarTablaSesiones() {
     }
 }
 
-// Función para refrescar tanto el estado como la tabla de sesiones
+// Función auxiliar para refrescar la tarjeta de estado y la tabla del servidor al mismo tiempo
 async function refrescarTodo() {
     await actualizarEstado();
     await actualizarTablaSesiones();
 }
 
-// Configuración de todos los eventos de la página
+/**
+ * Conecta todos los eventos de la página (el select de usuarios, el formulario de login, 
+ * los botones automáticos con data-url y los botones de refrescar).
+ */
 function inicializarEventos() {
-    // 1. Cambio automático de contraseña al cambiar de usuario en el select
+    // 1. Cambia la contraseña automáticamente al cambiar de usuario en el menú desplegable
     const selectUsuario = document.getElementById('usuario');
     const inputContrasena = document.getElementById('contrasena');
     
@@ -177,15 +196,14 @@ function inicializarEventos() {
             const usuarioVal = selectUsuario.value;
             inputContrasena.value = usuarioVal + '12345';
         });
-        // Inicializar el valor con el usuario seleccionado por defecto
         selectUsuario.dispatchEvent(new Event('change'));
     }
 
-    // 2. Envío del formulario de login (#form-login) sin recargar la página
+    // 2. Envía el formulario de login con fetch y evitamos que recargue la página usando preventDefault
     const formLogin = document.getElementById('form-login');
     if (formLogin) {
         formLogin.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evita la recarga completa
+            e.preventDefault(); 
             const usuario = selectUsuario.value;
             const contrasena = inputContrasena.value;
 
@@ -195,7 +213,7 @@ function inicializarEventos() {
         });
     }
 
-    // 3. Botones con data-metodo y data-url (se recorren todos automáticamente)
+    // 3. Recorremos con querySelectorAll todos los botones de acción que tengan data-url para no repetir código
     const botonesAccion = document.querySelectorAll('[data-url]');
     botonesAccion.forEach(boton => {
         boton.addEventListener('click', async () => {
@@ -208,7 +226,7 @@ function inicializarEventos() {
         });
     });
 
-    // 4. Botón de refrescar general (#btn-refrescar)
+    // 4. Botón general para refrescar la información
     const btnRefrescar = document.getElementById('btn-refrescar');
     if (btnRefrescar) {
         btnRefrescar.addEventListener('click', async () => {
@@ -216,7 +234,7 @@ function inicializarEventos() {
         });
     }
 
-    // 5. Botón específico para actualizar solo la tabla (#btn-sesiones)
+    // 5. Botón específico para actualizar solo la tabla de sesiones
     const btnSesiones = document.getElementById('btn-sesiones');
     if (btnSesiones) {
         btnSesiones.addEventListener('click', async () => {
@@ -225,17 +243,16 @@ function inicializarEventos() {
     }
 }
 
-// Ejecutamos la inicialización de eventos y cargamos el estado inicial
+// Al cargar el DOM completamente, cargamos la configuración inicial y disparamos los eventos
 document.addEventListener('DOMContentLoaded', async () => {
-    // Etapa 6: Cargar la configuración inicial GET /api/config
+    // Etapa 6: Consultamos la ruta GET /api/config para pintar la tarjeta de configuración
     const resConfig = await llamar('GET', '/api/config');
     const divConfig = document.getElementById('config');
     if (divConfig && resConfig.status === 200) {
         divConfig.textContent = JSON.stringify(resConfig.datos, null, 2);
     }
 
-    // Inicializar eventos y refrescar estado/tabla al cargar
+    // Inicializamos los eventos de los botones y actualizamos estado y tabla por primera vez
     inicializarEventos();
     await refrescarTodo();
 });
-

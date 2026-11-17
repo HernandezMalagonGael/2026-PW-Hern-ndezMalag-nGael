@@ -141,7 +141,7 @@ function crearApp(config, pool){
     const desde = config.rolling ? req.session.ultimoIUso : req.session.creada;
     res.json({
       usuario: req.session.usuario,
-      sesion : idCorto(req, sessionID),
+      sesion : idCorto(req.sessionID),
       expiraEnSegundos: Math.max(0, Math.round((desde + config.maxAge - Date.now()) / 10000)),
     });
   });
